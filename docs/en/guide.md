@@ -39,3 +39,11 @@ The receiver is registered by the input method itself with `android.permission.D
 Node text and descriptions longer than 256 characters are shortened in the returned tree. Hashes of the complete values let `android.tap_text` match a caller-supplied full value and bind bounds-selected nodes through confirmation and the final Accessibility click without expanding the tree response. A dense tree that reaches the Binder reply budget is returned as a marked partial snapshot; semantic lookup and clicks reject that snapshot rather than assuming a node is unique. Native companion calls use a quiet pipe to preserve the encoded reply when ordinary shell execution is configured for PTY.
 
 Disabling the Accessibility service makes the provider return an unavailable result. A pending action fails if the service goes away after nl2sh confirmation; nl2sh does not silently switch backends after approval. Disabling the keyboard makes the IME actions report that the keyboard is not loaded; the Accessibility actions are unaffected, and the two services are enabled and used independently.
+
+## Diagnose the companion separately
+
+Check that `com.nl2sh.bridge` is installed, then open the app to inspect service and keyboard status. Enabling Accessibility and selecting the keyboard are separate operations: tree/click/gesture features require the former, IME commits require the latter. An ordinary application UID cannot use the provider even when both services are enabled.
+
+A provider permission error requires a shell/root caller, not wider exported permissions. An unavailable tree requires the service to be enabled; a partial tree requires a fresh complete snapshot before semantic selection. A stale target or package/bounds mismatch requires reading the current UI and preparing a new action and approval. A failed gesture or input does not prove that the UI remained unchanged; read the screen again before deciding whether to retry.
+
+The native tool catalog is the public Agent interface. The Binder provider and shell broadcasts are compatibility interfaces for the native runtime and explicit debugging, not remote approval endpoints. Do not expose them through a new network listener. Changes must be checked against both the native tool preparation code and companion execution checks.

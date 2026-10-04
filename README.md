@@ -4,7 +4,7 @@
 
 Optional Android API 26+ Accessibility and keyboard companion for [nl2sh](https://github.com/nl2sh/nl2sh). The package and Binder authority remain `com.nl2sh.bridge` and `com.nl2sh.bridge.ops`.
 
-Build requirements: JDK 17, Android SDK Platform 35 / Build Tools 35.0.0, and `ANDROID_HOME`. Gradle Wrapper 8.9 is included; Python 3 is required for the helper packaging script.
+Build requirements: JDK 17, Android SDK Platform 35 / Build Tools 35.0.0, and `ANDROID_HOME`. Gradle Wrapper 8.9 is included.
 
 ```bash
 git clone https://github.com/nl2sh/android-bridge.git

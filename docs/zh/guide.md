@@ -39,3 +39,11 @@ adb shell am broadcast -a com.nl2sh.bridge.IME_TEXT --es mode replace --es msg '
 ```
 
 接收器由输入法运行时注册，发送方需 DUMP，仅 shell/root 可调用。这是显式本地调试，权限等同 adb shell，**不经过 nl2sh 确认链**。Base64 支持标准和 URL-safe 字母表。关闭键盘只影响 IME，关闭无障碍只影响 Accessibility；批准后服务消失则动作失败。
+
+## 独立排查伴侣状态
+
+确认已安装 `com.nl2sh.bridge`，打开应用查看服务与键盘状态。启用无障碍与选择键盘是独立操作：树、节点点击、手势需要前者，IME 提交需要后者。即使两者均启用，普通应用 UID 也不能调用 provider。
+
+Provider 权限错误需要改用 shell/root 调用方，不应扩大导出权限。树不可用时检查服务；部分树需重新取得完整快照才能作语义选择。目标过期或包名/bounds 不一致时重读当前 UI，重新准备动作并审批。手势或输入报失败不证明界面完全未变；决定重试前再次读取屏幕。
+
+原生工具目录是 Agent 的公开接口。Binder provider 与 shell 广播是原生运行时及显式调试的兼容接口，不是远程审批端点，不应增加网络监听来暴露它们。接口变更必须同时核对原生工具准备代码与伴侣执行校验。
