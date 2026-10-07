@@ -72,3 +72,11 @@ After installing the debug APK on an emulator, run
 It checks read-only discovery, service feature flags, v2 correlation, malformed requests and
 ordinary application UID denial. Run it with both services disabled, each service alone, and both
 enabled. API 26 passed all four combinations; Debug/Release assembly and lint also passed.
+
+The diagnostic screen shows app/protocol versions, Accessibility enabled/running states, keyboard
+enabled/selected/running states, provider registration and current capabilities. Returning to the
+screen or tapping Refresh diagnostics updates it; long content scrolls. Provider registration does
+not grant ordinary apps access. Compatibility is stated by protocol rather than an example version.
+
+API 26 dashboard smoke covered portrait rendering and scrolling to the bottom input in a narrow
+landscape viewport. Debug/Release assembly and lint passed.

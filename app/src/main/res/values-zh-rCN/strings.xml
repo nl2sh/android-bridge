@@ -9,4 +9,9 @@
     <string name="ime_status_inactive">当前输入法：你常用的键盘</string>
     <string name="switch_keyboard">nl2sh — 切换键盘</string>
     <string name="switch_keyboard_hint">请用系统切换键盘的手势或导航栏按钮切换输入法。</string>
+    <string name="refresh_diagnostics">刷新诊断</string>
+    <string name="diagnostic_yes">是</string>
+    <string name="diagnostic_no">否</string>
+    <string name="diagnostics_unavailable">诊断暂不可用</string>
+    <string name="diagnostic_summary">nl2sh Android Bridge %1$s · 协议 %2$d\n\n无障碍已启用：%3$s\n无障碍正在运行：%4$s\n\n键盘已启用：%5$s\n键盘已选中：%6$s\n键盘正在运行：%7$s\n\nBinder Provider 已注册：%8$s\nAuthority：com.nl2sh.bridge.ops\n调用权限：仅 shell/root\n\n当前可用能力：\n%9$s\n\n兼容性：协议 v2；支持旧的逐方法调用</string>
 </resources>

@@ -9,4 +9,9 @@
     <string name="ime_status_inactive">Current on-screen keyboard: your usual keyboard</string>
     <string name="switch_keyboard">nl2sh — switch keyboard</string>
     <string name="switch_keyboard_hint">Switch the on-screen keyboard with the system keyboard switch gesture or the navigation bar button.</string>
+    <string name="refresh_diagnostics">Refresh diagnostics</string>
+    <string name="diagnostic_yes">Yes</string>
+    <string name="diagnostic_no">No</string>
+    <string name="diagnostics_unavailable">Diagnostics unavailable</string>
+    <string name="diagnostic_summary">nl2sh Android Bridge %1$s · Protocol %2$d\n\nAccessibility enabled: %3$s\nAccessibility running: %4$s\n\nKeyboard enabled: %5$s\nKeyboard selected: %6$s\nKeyboard running: %7$s\n\nBinder provider registered: %8$s\nAuthority: com.nl2sh.bridge.ops\nAccess: shell/root only\n\nAvailable capabilities:\n%9$s\n\nCompatibility: protocol v2; legacy per-method calls supported</string>
 </resources>
