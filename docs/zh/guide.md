@@ -47,3 +47,25 @@ adb shell am broadcast -a com.nl2sh.bridge.IME_TEXT --es mode replace --es msg '
 Provider 权限错误需要改用 shell/root 调用方，不应扩大导出权限。树不可用时检查服务；部分树需重新取得完整快照才能作语义选择。目标过期或包名/bounds 不一致时重读当前 UI，重新准备动作并审批。手势或输入报失败不证明界面完全未变；决定重试前再次读取屏幕。
 
 原生工具目录是 Agent 的公开接口。Binder provider 与 shell 广播是原生运行时及显式调试的兼容接口，不是远程审批端点，不应增加网络监听来暴露它们。接口变更必须同时核对原生工具准备代码与伴侣执行校验。
+
+## Capability 协议 v2
+
+shell/root 可调用 `content call --uri content://com.nl2sh.bridge.ops --method capabilities`，
+即使两个服务都未启用也可查询。base64url 编码的 `data` 回复包含 `protocol_version: 2`、
+`app_version`、`build`（版本代码）、`installed_at`、独立的 `services.accessibility` 与
+`services.ime`、当前可用能力 ID 和实际限额（250 个树节点、65536 回复字节、4096 输入字节；
+ACTION_SET_TEXT 保留原有更小限额）。服务运行不表示已有焦点编辑器或完整节点树；执行时仍需校验目标身份。
+
+新客户端通过 `--method invoke --extra payload_b64:s:<base64url>` 发送无 padding 的 UTF-8 JSON：
+`{"protocol":2,"request_id":"unique-id","method":"capabilities","args":{}}`。
+回复为 `{"protocol":2,"request_id":"unique-id","ok":true,"result":{...}}`；失败则返回
+`ok:false` 和 `error`。编码请求最多 32768 字节，请求 ID 最多 128 字符。编码错误、协议不支持、
+非对象参数及递归 invoke 在分派前拒绝。保留旧的逐方法 extras，以兼容旧原生客户端。
+查询与 invoke 都保持 DUMP 和 shell/root 限制，不提供审批接口。
+
+### 协议回归验证
+
+在模拟器安装 Debug APK 后执行 `python3 scripts/protocol-smoke.py --serial emulator-5554`
+（可用 `--adb` 指定 ADB）。检查只读能力查询、服务能力标记、v2 请求关联、非法请求及普通应用 UID
+拒绝。分别在两个服务关闭、仅无障碍、仅输入法和都开启时执行。API 26 的四种组合通过，
+Debug/Release 构建与 lint 通过。

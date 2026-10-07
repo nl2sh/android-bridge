@@ -29,6 +29,9 @@ public final class BridgeService extends AccessibilityService {
     private static final int MAX_NODES = 250;
     private static final int MAX_SNAPSHOT_NODE_BYTES = 60 * 1024;
     private static volatile BridgeService current;
+
+    /** Whether this independent service is currently connected. */
+    static boolean isRunning() { return current != null; }
     private final Handler main = new Handler(Looper.getMainLooper());
     private final AtomicBoolean gestureActive = new AtomicBoolean(false);
 

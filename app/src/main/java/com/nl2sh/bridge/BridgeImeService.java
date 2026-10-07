@@ -48,6 +48,9 @@ public final class BridgeImeService extends InputMethodService {
     private static final int TYPE_TEXT_VARIATION_VISIBLE_PASSWORD = 0x00000090;
     private static final int TYPE_TEXT_VARIATION_WEB_PASSWORD = 0x000000e0;
     private static volatile BridgeImeService current;
+
+    /** Whether this independent service is currently connected. */
+    static boolean isRunning() { return current != null; }
     private final Handler main = new Handler(Looper.getMainLooper());
     private BridgeImeReceiver receiver;
     private boolean receiverRegistered;

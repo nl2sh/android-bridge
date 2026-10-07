@@ -47,3 +47,28 @@ Check that `com.nl2sh.bridge` is installed, then open the app to inspect service
 A provider permission error requires a shell/root caller, not wider exported permissions. An unavailable tree requires the service to be enabled; a partial tree requires a fresh complete snapshot before semantic selection. A stale target or package/bounds mismatch requires reading the current UI and preparing a new action and approval. A failed gesture or input does not prove that the UI remained unchanged; read the screen again before deciding whether to retry.
 
 The native tool catalog is the public Agent interface. The Binder provider and shell broadcasts are compatibility interfaces for the native runtime and explicit debugging, not remote approval endpoints. Do not expose them through a new network listener. Changes must be checked against both the native tool preparation code and companion execution checks.
+
+## Capability protocol v2
+
+Shell/root clients can call `content call --uri content://com.nl2sh.bridge.ops --method capabilities`
+even when both services are disabled. The base64url `data` reply includes `protocol_version: 2`,
+`app_version`, `build` (version code), `installed_at`, independent `services.accessibility` and
+`services.ime`, currently available feature IDs, and actual limits (250 tree nodes, 65536 reply
+bytes, 4096 input bytes; ACTION_SET_TEXT retains its narrower existing limit). A running service
+does not imply a focused editor or a complete tree; action-time identity checks remain required.
+
+New clients use `--method invoke --extra payload_b64:s:<base64url>` with an unpadded UTF-8 JSON
+payload: `{"protocol":2,"request_id":"unique-id","method":"capabilities","args":{}}`.
+The reply is `{"protocol":2,"request_id":"unique-id","ok":true,"result":{...}}`, or `ok:false`
+with an `error`. Payloads are limited to 32768 encoded bytes and request IDs to 128 characters.
+Malformed encoding, unsupported protocols, non-object arguments and recursive invoke calls are
+rejected before dispatch. Existing per-method extras remain supported for legacy native clients.
+Discovery and invoke retain the same DUMP and shell/root restrictions, without an approval API.
+
+### Protocol regression
+
+After installing the debug APK on an emulator, run
+`python3 scripts/protocol-smoke.py --serial emulator-5554` (use `--adb` for an explicit ADB path).
+It checks read-only discovery, service feature flags, v2 correlation, malformed requests and
+ordinary application UID denial. Run it with both services disabled, each service alone, and both
+enabled. API 26 passed all four combinations; Debug/Release assembly and lint also passed.
