@@ -10,3 +10,7 @@ local.properties
 *.keystore
 key.properties
 .DS_Store
+
+keystore.properties
+*.jks
+*.keystore

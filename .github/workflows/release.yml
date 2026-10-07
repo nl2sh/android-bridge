@@ -23,15 +23,48 @@ jobs:
       - name: Install Android build prerequisites
         run: sdkmanager "platforms;android-35" "build-tools;35.0.0"
       - uses: gradle/actions/setup-gradle@v4
-      - name: Build release APK
-        run: ./gradlew --no-daemon :app:assembleRelease :app:lintRelease
-      - name: Package unsigned APK
+      - name: Resolve release version
+        id: version
+        env:
+          RELEASE_TAG: ${{ github.ref_name }}
+        run: python3 .github/scripts/release-version.py >> "$GITHUB_OUTPUT"
+      - name: Restore signing key
+        env:
+          KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
+          STORE_PASSWORD: ${{ secrets.STORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
         run: |
+          set -euo pipefail
+          for name in KEYSTORE_BASE64 STORE_PASSWORD KEY_ALIAS KEY_PASSWORD; do
+            [[ -n "${!name}" ]] || { echo "::error::Missing signing secret: $name"; exit 1; }
+          done
+          umask 077
+          printf '%s' "$KEYSTORE_BASE64" | base64 --decode > "$RUNNER_TEMP/bridge-release.jks"
+      - name: Build signed release APK
+        env:
+          NL2SH_BRIDGE_KEYSTORE_FILE: ${{ runner.temp }}/bridge-release.jks
+          STORE_PASSWORD: ${{ secrets.STORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+          VERSION_NAME: ${{ steps.version.outputs.version }}
+          VERSION_CODE: ${{ steps.version.outputs.code }}
+        run: |
+          ./gradlew --no-daemon :app:assembleRelease :app:lintRelease \
+            "-Pnl2shBridgeVersionName=$VERSION_NAME" "-Pnl2shBridgeVersionCode=$VERSION_CODE"
+      - name: Verify and package signed APK
+        run: |
+          set -euo pipefail
           mkdir -p dist
-          cp app/build/outputs/apk/release/app-release-unsigned.apk dist/nl2sh-android-bridge-unsigned.apk
+          apk=app/build/outputs/apk/release/app-release.apk
+          test -f "$apk"
+          "$ANDROID_HOME/build-tools/35.0.0/apksigner" verify --verbose --print-certs "$apk"
+          cp "$apk" dist/nl2sh-android-bridge.apk
           cp LICENSE dist/
-          cd dist
-          sha256sum nl2sh-android-bridge-unsigned.apk > SHA256SUMS
+          (cd dist && sha256sum nl2sh-android-bridge.apk > SHA256SUMS)
+      - name: Remove signing key
+        if: always()
+        run: rm -f "$RUNNER_TEMP/bridge-release.jks"
       - uses: actions/upload-artifact@v4
         with:
           name: android-bridge-release

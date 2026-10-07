@@ -1,9 +1,9 @@
-# Releases
+# Release
 
-The Android project is independently versioned and published from this repository. Push a `v*` tag to run `.github/workflows/release.yml`; CI builds and lints with JDK 17 and Android SDK 35. Releases contain `nl2sh-android-bridge-unsigned.apk`, `SHA256SUMS`, and the project license.
+Push a `v*` semantic version tag to run `.github/workflows/release.yml`. The tag sets both Android version fields. JDK 17 and Android SDK 35 build and lint the APK. Releases contain signed `nl2sh-android-bridge.apk`, `SHA256SUMS`, and LICENSE. The build packages `assets/nl2sh-runtime.json` with the same version and protocol as the running application.
 
-The release APK is **unsigned** and must be signed before installation. Keep a stable private signing key outside the repository and use Android SDK `zipalign` followed by `apksigner sign`, then `apksigner verify`. Keep that key for future upgrades; Android refuses an in-place update signed by a different key. Existing debug installations use a different key, so migrate deliberately before installing a signed release. Do not commit signing keys or passwords.
+The signing job requires the existing GitHub Actions secrets `KEYSTORE_BASE64`, `STORE_PASSWORD`, `KEY_ALIAS`, and `KEY_PASSWORD`. It restores the keystore only in the runner temporary directory, verifies the APK with `apksigner`, and removes the temporary keystore even on failure. Keep a stable signing identity for upgrades; Android refuses an in-place update signed by a different key. Existing debug installations need an explicit migration. Never commit keys or passwords.
 
-Pull requests and pushes to `main` build debug and unsigned release APKs, run Android lint, and upload CI artifacts. The debug APK can be installed for development; its generated debug key is not a stable release signing identity.
+Local builds without signing configuration may produce unsigned release APKs. To sign locally, use ignored `keystore.properties` containing `storeFile`, `storePassword`, `keyAlias`, and `keyPassword`, or environment variables `NL2SH_BRIDGE_KEYSTORE_FILE`, `STORE_PASSWORD`, `KEY_ALIAS`, and `KEY_PASSWORD`. Partial configuration fails the build. Production signing may be deferred locally. Debug APKs use a development key.
 
-See the [guide](guide.md) for installation, service activation, and shell/root permissions. The native [nl2sh](https://github.com/nl2sh/nl2sh) executable has its own release cycle; coordinate interface changes between the projects.
+The native release aggregates this APK into its signed compatibility manifest, recording both the asset SHA-256 and the APK certificate SHA-256. These digests identify different things and both must match before installation. Publishing a companion does not activate Accessibility or select its keyboard. See the [guide](guide.md) for permissions and manual activation.

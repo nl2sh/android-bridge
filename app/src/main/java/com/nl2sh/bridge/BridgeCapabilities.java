@@ -9,7 +9,7 @@ import org.json.JSONObject;
 
 /** Versioned, read-only discovery independent of enabled services. */
 final class BridgeCapabilities {
-    static final int PROTOCOL = 2;
+    static final int PROTOCOL = BuildConfig.BRIDGE_PROTOCOL_VERSION;
 
     private BridgeCapabilities() { }
 
